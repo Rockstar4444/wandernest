@@ -70,5 +70,95 @@
     "description": "Wrought-iron balconies, magnolia courtyards, and beignets on the corner.",
     "image": "https://images.unsplash.com/photo-1568084680786-a84f91d1153c?w=800&q=80",
     "rating": 4.7
+  },
+  {
+    "id": 101,
+    "name": "Le Marais Maison",
+    "city": "Paris, France",
+    "price": 248,
+    "description": "Boutique hideaway tucked into a 17th-century townhouse in the Marais — exposed beams and a hidden courtyard.",
+    "image": "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&q=80",
+    "rating": 4.7
+  },
+  {
+    "id": 102,
+    "name": "Hôtel Saint-Germain",
+    "city": "Paris, France",
+    "price": 312,
+    "description": "Left Bank elegance with velvet sofas, a tiny library bar, and croissants from the bakery downstairs.",
+    "image": "https://images.unsplash.com/photo-1431274172761-fca41d930114?w=800&q=80",
+    "rating": 4.8
+  },
+  {
+    "id": 103,
+    "name": "Montmartre Atelier",
+    "city": "Paris, France",
+    "price": 189,
+    "description": "A painter's loft a short climb from Sacré-Cœur, skylights pouring over the rooftops of Paris.",
+    "image": "https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=800&q=80",
+    "rating": 4.6
+  },
+  {
+    "id": 104,
+    "name": "Tour Eiffel View Suites",
+    "city": "Paris, France",
+    "price": 365,
+    "description": "Floor-to-ceiling Eiffel Tower views, marble baths, and a champagne welcome at check-in.",
+    "image": "https://images.unsplash.com/photo-1431274172761-fca41d930114?w=800&q=80",
+    "rating": 4.9
+  },
+  {
+    "id": 105,
+    "name": "Canal Saint-Martin Loft",
+    "city": "Paris, France",
+    "price": 174,
+    "description": "Industrial-chic loft by the canal, surrounded by coffee bars and weekend markets.",
+    "image": "https://images.unsplash.com/photo-1473221326025-9183b464bb7e?w=800&q=80",
+    "rating": 4.5
+  },
+  {
+    "id": 201,
+    "name": "Covent Garden Townhouse",
+    "city": "London, UK",
+    "price": 268,
+    "description": "Georgian townhouse a minute from theatreland — afternoon tea served in the parlour at four.",
+    "image": "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=800&q=80",
+    "rating": 4.7
+  },
+  {
+    "id": 202,
+    "name": "Shoreditch Loft Hotel",
+    "city": "London, UK",
+    "price": 192,
+    "description": "Brick-and-steel loft rooms over an East London cocktail bar; vinyl in every suite.",
+    "image": "https://images.unsplash.com/photo-1520637836862-4d197d17c11a?w=800&q=80",
+    "rating": 4.5
+  },
+  {
+    "id": 203,
+    "name": "Notting Hill Garden Rooms",
+    "city": "London, UK",
+    "price": 226,
+    "description": "Pastel facade, private walled garden, and the Portobello Market on your doorstep on Saturdays.",
+    "image": "https://images.unsplash.com/photo-1543832923-44667a44c804?w=800&q=80",
+    "rating": 4.8
+  },
+  {
+    "id": 204,
+    "name": "Thames View Riverside",
+    "city": "London, UK",
+    "price": 298,
+    "description": "Floor-to-ceiling views of the Thames and Tower Bridge, with a rooftop bar at golden hour.",
+    "image": "https://images.unsplash.com/photo-1486299267070-83823f5448dd?w=800&q=80",
+    "rating": 4.7
+  },
+  {
+    "id": 205,
+    "name": "Kensington Mews House",
+    "city": "London, UK",
+    "price": 215,
+    "description": "Charming mews house steps from Hyde Park — log fire in the snug, scones at breakfast.",
+    "image": "https://images.unsplash.com/photo-1551776235-dde6d4829808?w=800&q=80",
+    "rating": 4.6
   }
 ]
