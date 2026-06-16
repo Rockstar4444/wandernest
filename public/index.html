@@ -23,8 +23,33 @@
   </section>
 
   <main>
-    <h3 class="section-title">Featured Stays</h3>
-    <div id="hotelGrid" class="grid">Loading…</div>
+    <section class="search-panel">
+      <div class="search-row">
+        <div class="search-field grow">
+          <label for="q">Search hotels or cities</label>
+          <input id="q" type="search" placeholder="e.g. Paris, London, Garden, Loft…" autocomplete="off" />
+        </div>
+        <div class="search-field">
+          <label for="maxPrice">Max price <span id="maxPriceLabel">$500</span> / night</label>
+          <input id="maxPrice" type="range" min="100" max="500" step="10" value="500" />
+        </div>
+        <div class="search-field">
+          <label for="sortBy">Sort by</label>
+          <select id="sortBy">
+            <option value="default">Featured</option>
+            <option value="price-asc">Price: low to high</option>
+            <option value="price-desc">Price: high to low</option>
+            <option value="rating">Top rated</option>
+          </select>
+        </div>
+      </div>
+      <p class="result-count" id="resultCount">Loading stays…</p>
+    </section>
+
+    <div id="hotelGrid" class="grid"></div>
+    <p id="emptyState" class="empty-state" style="display:none;">
+      No stays match your search. Try a different city or raise the max price.
+    </p>
   </main>
 
   <footer>
@@ -32,30 +57,86 @@
   </footer>
 
   <script>
+    const state = { hotels: [], query: '', maxPrice: 500, sort: 'default' };
+
     async function loadHotels() {
-      const grid = document.getElementById('hotelGrid');
       try {
         const res = await fetch('/api/hotels');
-        const hotels = await res.json();
-        if (!hotels.length) { grid.innerHTML = '<p>No stays yet — check back soon.</p>'; return; }
-        grid.innerHTML = hotels.map(h => `
-          <article class="card">
-            <img src="${h.image}" alt="${h.name}" onerror="this.src='https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80'"/>
-            <div class="body">
-              <h3>${h.name}</h3>
-              <div class="city">${h.city}</div>
-              <p class="desc">${h.description || ''}</p>
-              <div class="meta">
-                <div class="price">$${h.price}<span> / night</span></div>
-                <div class="rating">★ ${h.rating || '—'}</div>
-              </div>
-            </div>
-          </article>
-        `).join('');
+        state.hotels = await res.json();
+        // expand price range to cover any future entries
+        const maxFound = Math.max(500, ...state.hotels.map(h => h.price || 0));
+        const slider = document.getElementById('maxPrice');
+        slider.max = maxFound;
+        slider.value = maxFound;
+        state.maxPrice = maxFound;
+        document.getElementById('maxPriceLabel').textContent = '$' + maxFound;
+        render();
       } catch (e) {
-        grid.innerHTML = '<p>Could not load stays. Please retry.</p>';
+        document.getElementById('resultCount').textContent = 'Could not load stays. Please retry.';
       }
     }
+
+    function filtered() {
+      const q = state.query.trim().toLowerCase();
+      let list = state.hotels.filter(h => {
+        if (h.price > state.maxPrice) return false;
+        if (!q) return true;
+        return (h.name || '').toLowerCase().includes(q)
+            || (h.city || '').toLowerCase().includes(q)
+            || (h.description || '').toLowerCase().includes(q);
+      });
+      if (state.sort === 'price-asc') list.sort((a,b) => a.price - b.price);
+      else if (state.sort === 'price-desc') list.sort((a,b) => b.price - a.price);
+      else if (state.sort === 'rating') list.sort((a,b) => (b.rating||0) - (a.rating||0));
+      return list;
+    }
+
+    function render() {
+      const list = filtered();
+      const grid = document.getElementById('hotelGrid');
+      const empty = document.getElementById('emptyState');
+      document.getElementById('resultCount').textContent =
+        list.length + ' stay' + (list.length === 1 ? '' : 's') +
+        (state.query ? ' for "' + state.query + '"' : '') +
+        ' · up to $' + state.maxPrice + '/night';
+
+      if (!list.length) {
+        grid.innerHTML = '';
+        empty.style.display = 'block';
+        return;
+      }
+      empty.style.display = 'none';
+      grid.innerHTML = list.map(h => `
+        <article class="card">
+          <img src="${h.image}" alt="${h.name}" onerror="this.src='https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80'"/>
+          <div class="body">
+            <h3>${h.name}</h3>
+            <div class="city">${h.city}</div>
+            <p class="desc">${h.description || ''}</p>
+            <div class="price-badge">$${h.price}<span>/night</span></div>
+            <div class="meta">
+              <div class="rating">★ ${h.rating || '—'}</div>
+            </div>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    // events
+    document.getElementById('q').addEventListener('input', e => {
+      state.query = e.target.value;
+      render();
+    });
+    document.getElementById('maxPrice').addEventListener('input', e => {
+      state.maxPrice = Number(e.target.value);
+      document.getElementById('maxPriceLabel').textContent = '$' + state.maxPrice;
+      render();
+    });
+    document.getElementById('sortBy').addEventListener('change', e => {
+      state.sort = e.target.value;
+      render();
+    });
+
     loadHotels();
   </script>
 </body>
