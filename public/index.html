@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wandernest — Find your next stay</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header>
+    <div class="bar">
+      <h1>🌍 Wandernest</h1>
+      <nav>
+        <a href="/">Stays</a>
+        <a href="/admin">Admin</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <h2>Wander further. Nest deeper.</h2>
+    <p>Hand-picked stays for travelers who want both adventure and a soft place to land.</p>
+  </section>
+
+  <main>
+    <h3 class="section-title">Featured Stays</h3>
+    <div id="hotelGrid" class="grid">Loading…</div>
+  </main>
+
+  <footer>
+    <p>© 2026 Wandernest · Crafted for wanderers</p>
+  </footer>
+
+  <script>
+    async function loadHotels() {
+      const grid = document.getElementById('hotelGrid');
+      try {
+        const res = await fetch('/api/hotels');
+        const hotels = await res.json();
+        if (!hotels.length) { grid.innerHTML = '<p>No stays yet — check back soon.</p>'; return; }
+        grid.innerHTML = hotels.map(h => `
+          <article class="card">
+            <img src="${h.image}" alt="${h.name}" onerror="this.src='https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80'"/>
+            <div class="body">
+              <h3>${h.name}</h3>
+              <div class="city">${h.city}</div>
+              <p class="desc">${h.description || ''}</p>
+              <div class="meta">
+                <div class="price">$${h.price}<span> / night</span></div>
+                <div class="rating">★ ${h.rating || '—'}</div>
+              </div>
+            </div>
+          </article>
+        `).join('');
+      } catch (e) {
+        grid.innerHTML = '<p>Could not load stays. Please retry.</p>';
+      }
+    }
+    loadHotels();
+  </script>
+</body>
+</html>

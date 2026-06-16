@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wandernest Admin</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header>
+    <div class="bar">
+      <h1>🌍 Wandernest Admin</h1>
+      <nav>
+        <a href="/">Public site</a>
+        <a href="#" id="logoutLink" style="display:none">Log out</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- LOGIN -->
+    <div id="loginView" class="login-box" style="display:none">
+      <h2>Admin login</h2>
+      <div class="field">
+        <label for="pw">Password</label>
+        <input id="pw" type="password" placeholder="Enter password" />
+      </div>
+      <button class="btn" id="loginBtn">Sign in</button>
+      <p id="loginErr" style="color:#b34646; margin-top:0.75rem; display:none;">Incorrect password.</p>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dashView" style="display:none">
+      <div class="toolbar">
+        <h3 class="section-title" style="margin:0; border:none;">Manage properties</h3>
+        <button class="btn" id="newBtn">+ Add property</button>
+      </div>
+
+      <div id="formCard" class="card" style="display:none; padding:1.5rem; margin-bottom:1.5rem; flex-direction:column;">
+        <h3 id="formTitle" style="color:var(--primary); margin-bottom:1rem;">New property</h3>
+        <div class="row">
+          <div class="field"><label>Name</label><input id="f_name" /></div>
+          <div class="field"><label>City</label><input id="f_city" /></div>
+        </div>
+        <div class="row">
+          <div class="field"><label>Price / night ($)</label><input id="f_price" type="number" /></div>
+          <div class="field"><label>Rating (0–5)</label><input id="f_rating" type="number" step="0.1" /></div>
+        </div>
+        <div class="field"><label>Image URL</label><input id="f_image" /></div>
+        <div class="field"><label>Description</label><textarea id="f_desc" rows="3"></textarea></div>
+        <div class="admin-row-actions">
+          <button class="btn" id="saveBtn">Save</button>
+          <button class="btn secondary" id="cancelBtn">Cancel</button>
+        </div>
+      </div>
+
+      <div id="adminList" class="grid admin-list">Loading…</div>
+    </div>
+  </main>
+
+  <footer><p>© 2026 Wandernest</p></footer>
+
+  <script>
+    let editingId = null;
+
+    async function checkSession() {
+      const r = await fetch('/api/session').then(r => r.json());
+      if (r.authenticated) showDash(); else showLogin();
+    }
+    function showLogin() {
+      document.getElementById('loginView').style.display = 'block';
+      document.getElementById('dashView').style.display = 'none';
+      document.getElementById('logoutLink').style.display = 'none';
+    }
+    function showDash() {
+      document.getElementById('loginView').style.display = 'none';
+      document.getElementById('dashView').style.display = 'block';
+      document.getElementById('logoutLink').style.display = 'inline';
+      loadAdminHotels();
+    }
+
+    document.getElementById('loginBtn').onclick = async () => {
+      const pw = document.getElementById('pw').value;
+      const r = await fetch('/api/login', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ password: pw })
+      });
+      if (r.ok) { document.getElementById('loginErr').style.display = 'none'; showDash(); }
+      else { document.getElementById('loginErr').style.display = 'block'; }
+    };
+    document.getElementById('pw').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('loginBtn').click();
+    });
+    document.getElementById('logoutLink').onclick = async (e) => {
+      e.preventDefault();
+      await fetch('/api/logout', { method: 'POST' });
+      showLogin();
+    };
+
+    async function loadAdminHotels() {
+      const list = document.getElementById('adminList');
+      const hotels = await fetch('/api/hotels').then(r => r.json());
+      if (!hotels.length) { list.innerHTML = '<p>No properties yet. Add one above.</p>'; return; }
+      list.innerHTML = hotels.map(h => `
+        <div class="card">
+          <img src="${h.image}" alt="" onerror="this.src='https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80'"/>
+          <div class="body">
+            <h3>${h.name}</h3>
+            <div class="city">${h.city} · $${h.price}/night · ★ ${h.rating}</div>
+          </div>
+          <div class="admin-row-actions" style="padding-right:1rem;">
+            <button class="btn small secondary" data-edit="${h.id}">Edit</button>
+            <button class="btn small danger" data-del="${h.id}">Delete</button>
+          </div>
+        </div>
+      `).join('');
+      list.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => openEdit(b.dataset.edit));
+      list.querySelectorAll('[data-del]').forEach(b => b.onclick = () => removeHotel(b.dataset.del));
+    }
+
+    document.getElementById('newBtn').onclick = () => {
+      editingId = null;
+      document.getElementById('formTitle').textContent = 'New property';
+      ['f_name','f_city','f_price','f_image','f_desc','f_rating'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('formCard').style.display = 'flex';
+    };
+    document.getElementById('cancelBtn').onclick = () => { document.getElementById('formCard').style.display = 'none'; };
+
+    async function openEdit(id) {
+      const h = await fetch('/api/hotels/' + id).then(r => r.json());
+      editingId = id;
+      document.getElementById('formTitle').textContent = 'Edit property';
+      document.getElementById('f_name').value = h.name || '';
+      document.getElementById('f_city').value = h.city || '';
+      document.getElementById('f_price').value = h.price || '';
+      document.getElementById('f_image').value = h.image || '';
+      document.getElementById('f_desc').value = h.description || '';
+      document.getElementById('f_rating').value = h.rating || '';
+      document.getElementById('formCard').style.display = 'flex';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.getElementById('saveBtn').onclick = async () => {
+      const body = {
+        name: document.getElementById('f_name').value,
+        city: document.getElementById('f_city').value,
+        price: Number(document.getElementById('f_price').value),
+        image: document.getElementById('f_image').value,
+        description: document.getElementById('f_desc').value,
+        rating: Number(document.getElementById('f_rating').value),
+      };
+      const url = editingId ? '/api/hotels/' + editingId : '/api/hotels';
+      const method = editingId ? 'PUT' : 'POST';
+      const r = await fetch(url, { method, headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body) });
+      if (r.ok) { document.getElementById('formCard').style.display = 'none'; loadAdminHotels(); }
+      else { alert('Save failed. Try again.'); }
+    };
+
+    async function removeHotel(id) {
+      if (!confirm('Delete this property?')) return;
+      const r = await fetch('/api/hotels/' + id, { method: 'DELETE' });
+      if (r.ok) loadAdminHotels();
+    }
+
+    checkSession();
+  </script>
+</body>
+</html>
