@@ -1,0 +1,74 @@
+[
+  {
+    "id": 1,
+    "name": "Collins Beach Suites",
+    "city": "Miami Beach, FL",
+    "price": 189,
+    "description": "Oceanfront suites on Collins Ave with private balconies and morning yoga on the sand.",
+    "image": "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800&q=80",
+    "rating": 4.7
+  },
+  {
+    "id": 2,
+    "name": "SoBe Art House",
+    "city": "Miami Beach, FL",
+    "price": 159,
+    "description": "Pastel art-deco rooms steps from Lincoln Road shops, cafés, and ocean breezes.",
+    "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80",
+    "rating": 4.5
+  },
+  {
+    "id": 3,
+    "name": "Harborview Downtown",
+    "city": "Seattle, WA",
+    "price": 211,
+    "description": "Floor-to-ceiling windows over Elliott Bay, walking distance to Pike Place Market.",
+    "image": "https://images.unsplash.com/photo-1455587734955-081b22074882?w=800&q=80",
+    "rating": 4.6
+  },
+  {
+    "id": 4,
+    "name": "Alpine Lodge",
+    "city": "Aspen, CO",
+    "price": 389,
+    "description": "Timber-and-stone retreat with ski-in/ski-out access and a 24/7 cocoa bar.",
+    "image": "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=800&q=80",
+    "rating": 4.9
+  },
+  {
+    "id": 5,
+    "name": "Gramercy Loft",
+    "city": "New York, NY",
+    "price": 274,
+    "description": "Industrial loft with exposed brick, a block from Gramercy Park.",
+    "image": "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80",
+    "rating": 4.6
+  },
+  {
+    "id": 6,
+    "name": "Mission Courtyard",
+    "city": "San Francisco, CA",
+    "price": 168,
+    "description": "Sun-soaked courtyard hotel in the Mission with rooftop tacos and live music.",
+    "image": "https://images.unsplash.com/photo-1501117716987-c8e1ecb2100c?w=800&q=80",
+    "rating": 4.4
+  },
+  {
+    "id": 7,
+    "name": "Lakeside Retreat",
+    "city": "Lake Tahoe, CA",
+    "price": 232,
+    "description": "A-frame cabins on the water with kayaks at the dock and a fire pit under the stars.",
+    "image": "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&q=80",
+    "rating": 4.8
+  },
+  {
+    "id": 8,
+    "name": "Garden District",
+    "city": "New Orleans, LA",
+    "price": 178,
+    "description": "Wrought-iron balconies, magnolia courtyards, and beignets on the corner.",
+    "image": "https://images.unsplash.com/photo-1568084680786-a84f91d1153c?w=800&q=80",
+    "rating": 4.7
+  }
+]
