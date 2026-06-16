@@ -106,16 +106,18 @@
         return;
       }
       empty.style.display = 'none';
+      const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
       grid.innerHTML = list.map(h => `
         <article class="card">
-          <img src="${h.image}" alt="${h.name}" onerror="this.src='https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80'"/>
+          <img src="${esc(h.image)}" alt="${esc(h.name)}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80'"/>
           <div class="body">
-            <h3>${h.name}</h3>
-            <div class="city">${h.city}</div>
-            <p class="desc">${h.description || ''}</p>
+            <h3>${esc(h.name)}</h3>
+            <div class="city">${esc(h.city)}</div>
+            <p class="desc">${esc(h.description || '')}</p>
             <div class="price-badge">$${h.price}<span>/night</span></div>
             <div class="meta">
               <div class="rating">★ ${h.rating || '—'}</div>
+              ${h.bookingUrl ? `<a class="book-btn" href="${esc(h.bookingUrl)}" target="_blank" rel="noopener noreferrer">Book direct →</a>` : ''}
             </div>
           </div>
         </article>
