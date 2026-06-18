@@ -44,6 +44,9 @@
         </div>
       </div>
       <p class="result-count" id="resultCount">Loading stays…</p>
+      <p id="adminBanner" class="admin-banner" style="display:none;">
+        🔑 Admin mode — click any price to edit it.
+      </p>
     </section>
 
     <div id="hotelGrid" class="grid"></div>
@@ -52,24 +55,45 @@
     </p>
   </main>
 
+  <div id="toast" class="toast"></div>
+
   <footer>
     <p>© 2026 Wandernest · Crafted for wanderers</p>
   </footer>
 
   <script>
-    const state = { hotels: [], query: '', maxPrice: 500, sort: 'default' };
+    const state = { hotels: [], query: '', maxPrice: 500, sort: 'default', isAdmin: false };
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const fmt = n => Number(n).toLocaleString('en-US', { maximumFractionDigits: 2 });
+
+    function toast(msg, kind) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast show' + (kind ? ' ' + kind : '');
+      clearTimeout(toast._timer);
+      toast._timer = setTimeout(() => { t.className = 'toast'; }, 2400);
+    }
+
+    async function checkSession() {
+      try {
+        const r = await fetch('/api/session').then(r => r.json());
+        state.isAdmin = !!r.authenticated;
+        document.getElementById('adminBanner').style.display = state.isAdmin ? 'block' : 'none';
+      } catch (e) {
+        state.isAdmin = false;
+      }
+    }
 
     async function loadHotels() {
       try {
         const res = await fetch('/api/hotels');
         state.hotels = await res.json();
-        // expand price range to cover any future entries
-        const maxFound = Math.max(500, ...state.hotels.map(h => h.price || 0));
+        const maxFound = Math.max(500, ...state.hotels.map(h => Math.ceil(h.price || 0)));
         const slider = document.getElementById('maxPrice');
         slider.max = maxFound;
         slider.value = maxFound;
         state.maxPrice = maxFound;
-        document.getElementById('maxPriceLabel').textContent = '$' + maxFound;
+        document.getElementById('maxPriceLabel').textContent = '$' + fmt(maxFound);
         render();
       } catch (e) {
         document.getElementById('resultCount').textContent = 'Could not load stays. Please retry.';
@@ -98,7 +122,7 @@
       document.getElementById('resultCount').textContent =
         list.length + ' stay' + (list.length === 1 ? '' : 's') +
         (state.query ? ' for "' + state.query + '"' : '') +
-        ' · up to $' + state.maxPrice + '/night';
+        ' · up to $' + fmt(state.maxPrice) + '/night';
 
       if (!list.length) {
         grid.innerHTML = '';
@@ -106,15 +130,16 @@
         return;
       }
       empty.style.display = 'none';
-      const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
       grid.innerHTML = list.map(h => `
-        <article class="card">
+        <article class="card" data-id="${esc(h.id)}">
           <img src="${esc(h.image)}" alt="${esc(h.name)}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80'"/>
           <div class="body">
             <h3>${esc(h.name)}</h3>
             <div class="city">${esc(h.city)}</div>
             <p class="desc">${esc(h.description || '')}</p>
-            <div class="price-badge">$${h.price}<span>/night</span></div>
+            <div class="price-badge ${state.isAdmin ? 'editable' : ''}" data-id="${esc(h.id)}" title="${state.isAdmin ? 'Click to edit' : ''}">
+              $${fmt(h.price)}<span>/night</span>${state.isAdmin ? '<em class="pencil">✎</em>' : ''}
+            </div>
             <div class="meta">
               <div class="rating">★ ${h.rating || '—'}</div>
               ${h.bookingUrl ? `<a class="book-btn" href="${esc(h.bookingUrl)}" target="_blank" rel="noopener noreferrer">Book direct →</a>` : ''}
@@ -122,6 +147,76 @@
           </div>
         </article>
       `).join('');
+
+      // wire inline price edit when admin
+      if (state.isAdmin) {
+        grid.querySelectorAll('.price-badge.editable').forEach(badge => {
+          badge.addEventListener('click', () => openInlineEditor(badge));
+        });
+      }
+    }
+
+    function openInlineEditor(badge) {
+      const id = badge.dataset.id;
+      const hotel = state.hotels.find(h => String(h.id) === String(id));
+      if (!hotel) return;
+
+      // Replace badge with input + Save/Cancel
+      const old = badge.innerHTML;
+      badge.classList.add('editing');
+      badge.innerHTML = `
+        <span class="dollar">$</span>
+        <input type="number" step="0.01" min="0" value="${hotel.price}" class="inline-price-input" />
+        <button class="inline-save" title="Save">✓</button>
+        <button class="inline-cancel" title="Cancel">✕</button>
+      `;
+      const input = badge.querySelector('input');
+      input.focus();
+      input.select();
+
+      const restore = () => {
+        badge.classList.remove('editing');
+        badge.innerHTML = old;
+        badge.addEventListener('click', () => openInlineEditor(badge), { once: true });
+      };
+
+      const save = async () => {
+        const newPrice = Number(input.value);
+        if (!isFinite(newPrice) || newPrice < 0) {
+          toast('Enter a valid price', 'error');
+          return;
+        }
+        if (newPrice === Number(hotel.price)) { restore(); return; }
+        try {
+          const r = await fetch('/api/hotels/' + id, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ price: newPrice })
+          });
+          if (r.status === 401) {
+            toast('Session expired — sign in again', 'error');
+            setTimeout(() => location.href = '/admin', 1200);
+            return;
+          }
+          if (!r.ok) throw new Error('Save failed');
+          const updated = await r.json();
+          hotel.price = updated.price;
+          toast(`Updated ${hotel.name} → $${fmt(updated.price)}`, 'success');
+          render();
+        } catch (e) {
+          toast('Save failed — try again', 'error');
+          restore();
+        }
+      };
+
+      input.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); save(); }
+        else if (e.key === 'Escape') { e.preventDefault(); restore(); }
+      });
+      badge.querySelector('.inline-save').addEventListener('click', e => { e.stopPropagation(); save(); });
+      badge.querySelector('.inline-cancel').addEventListener('click', e => { e.stopPropagation(); restore(); });
+      // prevent badge-click bubbling re-opening the editor
+      badge.querySelector('input').addEventListener('click', e => e.stopPropagation());
     }
 
     // events
@@ -131,7 +226,7 @@
     });
     document.getElementById('maxPrice').addEventListener('input', e => {
       state.maxPrice = Number(e.target.value);
-      document.getElementById('maxPriceLabel').textContent = '$' + state.maxPrice;
+      document.getElementById('maxPriceLabel').textContent = '$' + fmt(state.maxPrice);
       render();
     });
     document.getElementById('sortBy').addEventListener('change', e => {
@@ -139,7 +234,10 @@
       render();
     });
 
-    loadHotels();
+    (async () => {
+      await checkSession();
+      await loadHotels();
+    })();
   </script>
 </body>
 </html>

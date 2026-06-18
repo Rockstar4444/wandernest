@@ -205,6 +205,96 @@ footer {
 .book-btn:hover { background: #6f3710; color: var(--cream); }
 .card .meta { gap: 0.75rem; }
 
+/* admin banner on public homepage */
+.admin-banner {
+  margin-top: 0.75rem;
+  padding: 0.6rem 0.85rem;
+  background: #fff4dd;
+  border: 1px solid #e8c897;
+  border-radius: 8px;
+  color: #6b4a14;
+  font-size: 0.9rem;
+}
+
+/* clickable price badge for admins */
+.price-badge.editable { cursor: pointer; position: relative; padding-right: 1.85rem; }
+.price-badge.editable:hover { filter: brightness(1.05); box-shadow: 0 0 0 2px rgba(255,255,255,0.4) inset; }
+.price-badge .pencil {
+  position: absolute; right: 0.55rem; top: 50%;
+  transform: translateY(-50%);
+  font-style: normal; opacity: 0.85; font-size: 0.9rem;
+}
+.price-badge.editing {
+  background: #fff; color: var(--ink);
+  border: 1px solid var(--accent);
+  padding: 0.25rem 0.55rem;
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  cursor: text;
+}
+.price-badge.editing .dollar { color: var(--accent); font-weight: bold; }
+.price-badge.editing input {
+  width: 7rem; padding: 0.25rem 0.4rem; font-size: 1rem;
+  border: 1px solid #d8cdbd; border-radius: 4px;
+  font-family: inherit;
+}
+.price-badge.editing .inline-save,
+.price-badge.editing .inline-cancel {
+  border: none; cursor: pointer;
+  width: 1.85rem; height: 1.85rem; border-radius: 4px;
+  font-size: 0.95rem; line-height: 1; padding: 0;
+}
+.price-badge.editing .inline-save { background: var(--accent); color: #fff; }
+.price-badge.editing .inline-cancel { background: #f3e9d8; color: var(--ink); }
+
+/* admin row inline price editor */
+.row-edit {
+  margin-top: 0.5rem;
+  display: flex; align-items: center; gap: 0.5rem;
+  font-size: 0.95rem;
+}
+.row-edit label {
+  display: inline-flex; align-items: center; gap: 0.25rem;
+  background: #fff; padding: 0.2rem 0.5rem;
+  border: 1px solid #d8cdbd; border-radius: 6px;
+  font-weight: bold; color: var(--accent);
+  margin: 0;
+}
+.row-edit input.row-price {
+  width: 6.5rem; border: none; outline: none;
+  font-size: 1rem; padding: 0.15rem 0.25rem;
+  font-family: inherit; background: transparent;
+  color: var(--ink); font-weight: bold;
+}
+.row-edit input.row-price:focus { background: #fffbe8; }
+.row-edit .row-status { color: var(--muted); font-size: 0.9rem; }
+
+.admin-tip {
+  background: #fff4dd; border: 1px solid #e8c897;
+  border-radius: 8px; padding: 0.6rem 0.85rem;
+  color: #6b4a14; font-size: 0.9rem; margin-bottom: 1rem;
+}
+.admin-tip kbd {
+  background: #fff; border: 1px solid #d8cdbd;
+  border-radius: 4px; padding: 0.05rem 0.35rem;
+  font-family: ui-monospace, Menlo, monospace; font-size: 0.82rem;
+}
+
+/* toast */
+.toast {
+  position: fixed; left: 50%; bottom: 1.5rem;
+  transform: translateX(-50%) translateY(20px);
+  background: #2b1d12; color: #fff;
+  padding: 0.7rem 1.1rem;
+  border-radius: 999px; font-size: 0.95rem;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 9999;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.success { background: #4a6b1e; }
+.toast.error { background: #b34646; }
+
 @media (max-width: 800px) {
   .search-row { grid-template-columns: 1fr; }
 }
